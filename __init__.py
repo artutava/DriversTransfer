@@ -39,6 +39,7 @@ class COPY_DRIVERS_OT_operator(bpy.types.Operator):
     def execute(self, context):
         source_obj = context.scene.copy_drivers_source
         target_obj = context.scene.copy_drivers_target
+        target_armature = context.scene.copy_drivers_target_armature
 
         if not source_obj or not target_obj:
             self.report({'ERROR'}, "Both source and target objects must be selected")
@@ -69,8 +70,8 @@ class COPY_DRIVERS_OT_operator(bpy.types.Operator):
                 new_var = driver.driver.variables.new()
                 new_var.name = var.name
                 new_var.type = var.type
-                if var.targets[0].id == source_obj:
-                    new_var.targets[0].id = target_obj
+                if var.type == 'TRANSFORMS' and target_armature:
+                    new_var.targets[0].id = target_armature
                 else:
                     new_var.targets[0].id = var.targets[0].id
                 new_var.targets[0].data_path = var.targets[0].data_path
@@ -79,7 +80,6 @@ class COPY_DRIVERS_OT_operator(bpy.types.Operator):
             driver.driver.expression = source_driver.driver.expression
 
         return {'FINISHED'}
-
 
 
 
@@ -94,8 +94,11 @@ class COPY_DRIVERS_PT_panel(bpy.types.Panel):
         layout = self.layout
         layout.prop(context.scene, "copy_drivers_source")
         layout.prop(context.scene, "copy_drivers_target")
+        layout.prop_search(context.scene, "copy_drivers_target_armature", context.scene, "objects", text="Target Armature")
+        layout.separator()
         layout.operator("object.copy_drivers")
         layout.operator("object.delete_all_shape_key_drivers")
+
 
 
 
@@ -105,6 +108,7 @@ def register():
     bpy.utils.register_class(COPY_DRIVERS_PT_panel)
     bpy.types.Scene.copy_drivers_source = bpy.props.PointerProperty(type=bpy.types.Object)
     bpy.types.Scene.copy_drivers_target = bpy.props.PointerProperty(type=bpy.types.Object)
+    bpy.types.Scene.copy_drivers_target_armature = bpy.props.PointerProperty(type=bpy.types.Object)
 
 def unregister():
     bpy.utils.unregister_class(COPY_DRIVERS_OT_operator)
@@ -112,6 +116,7 @@ def unregister():
     bpy.utils.unregister_class(COPY_DRIVERS_PT_panel)
     del bpy.types.Scene.copy_drivers_source
     del bpy.types.Scene.copy_drivers_target
+    del bpy.types.Scene.copy_drivers_target_armature
 
 if __name__ == "__main__":
     register()
