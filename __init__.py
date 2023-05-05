@@ -10,6 +10,26 @@ bl_info = {
 
 import bpy
 
+class DeleteAllShapeKeyDriversOperator(bpy.types.Operator):
+    bl_idname = "object.delete_all_shape_key_drivers"
+    bl_label = "Delete All Shape Key Drivers"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return context.selected_objects is not None
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_confirm(self, event)
+
+    def execute(self, context):
+        for obj in context.selected_objects:
+            if obj.type == 'MESH' and obj.data.shape_keys and obj.data.shape_keys.animation_data:
+                obj.data.shape_keys.animation_data_clear()
+                self.report({'INFO'}, f"All shape key drivers deleted from {obj.name}")
+
+        return {'FINISHED'}
+
 class COPY_DRIVERS_OT_operator(bpy.types.Operator):
     bl_idname = "object.copy_drivers"
     bl_label = "Copy Drivers"
@@ -75,15 +95,20 @@ class COPY_DRIVERS_PT_panel(bpy.types.Panel):
         layout.prop(context.scene, "copy_drivers_source")
         layout.prop(context.scene, "copy_drivers_target")
         layout.operator("object.copy_drivers")
+        layout.operator("object.delete_all_shape_key_drivers")
+
+
 
 def register():
     bpy.utils.register_class(COPY_DRIVERS_OT_operator)
+    bpy.utils.register_class(DeleteAllShapeKeyDriversOperator)
     bpy.utils.register_class(COPY_DRIVERS_PT_panel)
     bpy.types.Scene.copy_drivers_source = bpy.props.PointerProperty(type=bpy.types.Object)
     bpy.types.Scene.copy_drivers_target = bpy.props.PointerProperty(type=bpy.types.Object)
 
 def unregister():
     bpy.utils.unregister_class(COPY_DRIVERS_OT_operator)
+    bpy.utils.unregister_class(DeleteAllShapeKeyDriversOperator)
     bpy.utils.unregister_class(COPY_DRIVERS_PT_panel)
     del bpy.types.Scene.copy_drivers_source
     del bpy.types.Scene.copy_drivers_target
