@@ -49,7 +49,10 @@ class COPY_DRIVERS_OT_operator(bpy.types.Operator):
                 new_var = driver.driver.variables.new()
                 new_var.name = var.name
                 new_var.type = var.type
-                new_var.targets[0].id = var.targets[0].id
+                if var.targets[0].id == source_obj:
+                    new_var.targets[0].id = target_obj
+                else:
+                    new_var.targets[0].id = var.targets[0].id
                 new_var.targets[0].data_path = var.targets[0].data_path
 
             driver.driver.type = source_driver.driver.type
