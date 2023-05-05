@@ -24,21 +24,41 @@ class COPY_DRIVERS_OT_operator(bpy.types.Operator):
             self.report({'ERROR'}, "Both source and target objects must be selected")
             return {'CANCELLED'}
 
-        for i, source_prop in enumerate(source_obj.animation_data.drivers):
-            data_path = source_prop.data_path
-            driver = target_obj.driver_add(data_path)
+        if source_obj.data.shape_keys is None:
+            self.report({'ERROR'}, "Source object has no shape keys with drivers to copy")
+            return {'CANCELLED'}
 
-            for var in source_prop.driver.variables:
+        source_key_blocks = source_obj.data.shape_keys.key_blocks
+        source_shape_key_drivers = source_obj.data.shape_keys.animation_data.drivers if source_obj.data.shape_keys.animation_data else []
+
+        if target_obj.data.shape_keys is None:
+            target_obj.shape_key_add(name="Basis")
+        target_key_blocks = target_obj.data.shape_keys.key_blocks
+
+        for source_driver in source_shape_key_drivers:
+            source_key_block_name = source_driver.data_path.split('["')[-1].split('"]')[0]
+            target_key_block = target_key_blocks.get(source_key_block_name)
+            if not target_key_block:
+                source_key_block = source_key_blocks.get(source_key_block_name)
+                target_key_block = target_obj.shape_key_add(name=source_key_block.name)
+
+            data_path = source_driver.data_path
+            driver = target_obj.data.shape_keys.driver_add(data_path)
+
+            for var in source_driver.driver.variables:
                 new_var = driver.driver.variables.new()
                 new_var.name = var.name
                 new_var.type = var.type
                 new_var.targets[0].id = var.targets[0].id
                 new_var.targets[0].data_path = var.targets[0].data_path
 
-            driver.driver.type = source_prop.driver.type
-            driver.driver.expression = source_prop.driver.expression
+            driver.driver.type = source_driver.driver.type
+            driver.driver.expression = source_driver.driver.expression
 
         return {'FINISHED'}
+
+
+
 
 class COPY_DRIVERS_PT_panel(bpy.types.Panel):
     bl_label = "Copy Drivers"
