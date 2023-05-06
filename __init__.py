@@ -76,6 +76,8 @@ class COPY_DRIVERS_OT_operator(bpy.types.Operator):
                         new_var.targets[0].bone_target = var.targets[0].bone_target
                     else:
                         print(f"Bone '{var.targets[0].bone_target}' not found in target armature '{target_armature.name}'")
+                    new_var.targets[0].transform_space = var.targets[0].transform_space
+                    new_var.targets[0].transform_type = var.targets[0].transform_type
                 else:
                     new_var.targets[0].id = var.targets[0].id
                 new_var.targets[0].data_path = var.targets[0].data_path
@@ -84,6 +86,7 @@ class COPY_DRIVERS_OT_operator(bpy.types.Operator):
             driver.driver.expression = source_driver.driver.expression
 
         return {'FINISHED'}
+
 
 
 
