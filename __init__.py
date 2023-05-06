@@ -94,12 +94,30 @@ class COPY_DRIVERS_OT_operator(bpy.types.Operator):
             source_fcurve = source_driver.keyframe_points
             target_fcurve = driver.keyframe_points
 
+            # Clear target F-Curve's keyframe points
+            target_fcurve.clear()
+
+            # Add keyframe points from the source F-Curve to the target F-Curve
             for source_cp in source_fcurve:
                 target_cp = target_fcurve.insert(source_cp.co[0], source_cp.co[1])
+                target_cp.interpolation = source_cp.interpolation
+                target_cp.easing = source_cp.easing
                 target_cp.handle_left_type = source_cp.handle_left_type
                 target_cp.handle_right_type = source_cp.handle_right_type
-                target_cp.handle_left = source_cp.handle_left
-                target_cp.handle_right = source_cp.handle_right
+                target_cp.handle_left = source_cp.handle_left.copy()
+                target_cp.handle_right = source_cp.handle_right.copy()
+                target_cp.select_left_handle = source_cp.select_left_handle
+                target_cp.select_right_handle = source_cp.select_right_handle
+                target_cp.select_control_point = source_cp.select_control_point
+
+            # Remove the Generator modifier if present
+            for mod in driver.modifiers:
+                if mod.type == 'GENERATOR':
+                    driver.modifiers.remove(mod)
+                    
+            driver.extrapolation = 'LINEAR'
+
+
 
         return {'FINISHED'}
 
