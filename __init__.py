@@ -90,6 +90,17 @@ class COPY_DRIVERS_OT_operator(bpy.types.Operator):
             driver.driver.type = source_driver.driver.type
             driver.driver.expression = source_driver.driver.expression
 
+            # Copy f-curve and control points
+            source_fcurve = source_driver.keyframe_points
+            target_fcurve = driver.keyframe_points
+
+            for source_cp in source_fcurve:
+                target_cp = target_fcurve.insert(source_cp.co[0], source_cp.co[1])
+                target_cp.handle_left_type = source_cp.handle_left_type
+                target_cp.handle_right_type = source_cp.handle_right_type
+                target_cp.handle_left = source_cp.handle_left
+                target_cp.handle_right = source_cp.handle_right
+
         return {'FINISHED'}
 
 
