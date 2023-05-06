@@ -72,6 +72,10 @@ class COPY_DRIVERS_OT_operator(bpy.types.Operator):
                 new_var.type = var.type
                 if var.type == 'TRANSFORMS' and target_armature:
                     new_var.targets[0].id = target_armature
+                    if var.targets[0].bone_target in target_armature.data.bones:
+                        new_var.targets[0].bone_target = var.targets[0].bone_target
+                    else:
+                        print(f"Bone '{var.targets[0].bone_target}' not found in target armature '{target_armature.name}'")
                 else:
                     new_var.targets[0].id = var.targets[0].id
                 new_var.targets[0].data_path = var.targets[0].data_path
@@ -92,8 +96,8 @@ class COPY_DRIVERS_PT_panel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(context.scene, "copy_drivers_source")
-        layout.prop(context.scene, "copy_drivers_target")
+        layout.prop(context.scene, "copy_drivers_source", text="Source Mesh")
+        layout.prop(context.scene, "copy_drivers_target", text="Target Mesh")
         layout.prop_search(context.scene, "copy_drivers_target_armature", context.scene, "objects", text="Target Armature")
         layout.separator()
         layout.operator("object.copy_drivers")
@@ -108,7 +112,10 @@ def register():
     bpy.utils.register_class(COPY_DRIVERS_PT_panel)
     bpy.types.Scene.copy_drivers_source = bpy.props.PointerProperty(type=bpy.types.Object)
     bpy.types.Scene.copy_drivers_target = bpy.props.PointerProperty(type=bpy.types.Object)
-    bpy.types.Scene.copy_drivers_target_armature = bpy.props.PointerProperty(type=bpy.types.Object)
+    bpy.types.Scene.copy_drivers_target_armature = bpy.props.PointerProperty(
+        type=bpy.types.Object,
+        poll=lambda self, obj: obj.type == 'ARMATURE',
+    )
 
 def unregister():
     bpy.utils.unregister_class(COPY_DRIVERS_OT_operator)
