@@ -72,22 +72,21 @@ class COPY_DRIVERS_OT_operator(bpy.types.Operator):
                 new_var.type = var.type
                 if var.type == 'TRANSFORMS' and target_armature:
                     new_var.targets[0].id = target_armature
-                    if var.targets[0].bone_target in target_armature.data.bones:
+                    target_bone = target_armature.pose.bones.get(var.targets[0].bone_target)
+                    if target_bone:
                         new_var.targets[0].bone_target = var.targets[0].bone_target
                     else:
-                        print(f"Bone '{var.targets[0].bone_target}' not found in target armature '{target_armature.name}'")
-                    new_var.targets[0].transform_space = var.targets[0].transform_space
-                    new_var.targets[0].transform_type = var.targets[0].transform_type
+                        print(f"Bone '{var.targets[0].bone_target}' not found in target armature")
                 else:
                     new_var.targets[0].id = var.targets[0].id
                 new_var.targets[0].data_path = var.targets[0].data_path
+                new_var.targets[0].transform_type = var.targets[0].transform_type
+                new_var.targets[0].transform_space = var.targets[0].transform_space
 
             driver.driver.type = source_driver.driver.type
             driver.driver.expression = source_driver.driver.expression
 
         return {'FINISHED'}
-
-
 
 
 class COPY_DRIVERS_PT_panel(bpy.types.Panel):
