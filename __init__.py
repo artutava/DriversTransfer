@@ -72,16 +72,20 @@ class COPY_DRIVERS_OT_operator(bpy.types.Operator):
                 new_var.type = var.type
                 if var.type == 'TRANSFORMS' and target_armature:
                     new_var.targets[0].id = target_armature
-                    target_bone = target_armature.pose.bones.get(var.targets[0].bone_target)
-                    if target_bone:
-                        new_var.targets[0].bone_target = var.targets[0].bone_target
-                    else:
-                        print(f"Bone '{var.targets[0].bone_target}' not found in target armature")
+                    new_var.targets[0].data_path = var.targets[0].data_path.replace(source_obj.data.name, target_obj.data.name)
                 else:
-                    new_var.targets[0].id = var.targets[0].id
-                new_var.targets[0].data_path = var.targets[0].data_path
+                    id_data = var.targets[0].id
+                    owner = next((obj for obj in context.scene.objects if obj.data == id_data), None)
+                    if owner and owner.type == 'MESH':
+                        new_var.targets[0].id = owner
+                        new_var.targets[0].data_path = 'data.' + var.targets[0].data_path
+                    else:
+                        new_var.targets[0].id = id_data
+                        new_var.targets[0].data_path = var.targets[0].data_path
+
                 new_var.targets[0].transform_type = var.targets[0].transform_type
                 new_var.targets[0].transform_space = var.targets[0].transform_space
+                new_var.targets[0].bone_target = var.targets[0].bone_target
 
             driver.driver.type = source_driver.driver.type
             driver.driver.expression = source_driver.driver.expression
