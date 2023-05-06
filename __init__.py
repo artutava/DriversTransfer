@@ -1,14 +1,75 @@
 bl_info = {
-    "name": "Copy Drivers",
-    "author": "Your Name",
-    "version": (1, 0),
+    "name": "FACE TRANSFER",
+    "author": "SirCruX Studios",
+    "version": (1, 2),
     "blender": (2, 80, 0),
-    "location": "View3D > Sidebar > Copy Drivers",
+    "location": "View3D > Sidebar > FACE TRANSFER",
     "description": "Copies drivers from one object to another",
     "category": "Object",
 }
 
 import bpy
+
+class FACETRANSFER_OT_add_arkit(bpy.types.Operator):
+    bl_idname = "facetransfer.add_arkit"
+    bl_label = "Add Arkit Shapekeys"
+    bl_description = "Create Arkit Compatible Shapekeys"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+
+        obj = bpy.context.object
+
+        shapelist = [ "browInnerUp", "browDown_L", "browDown_R", "browOuterUp_L", "browOuterUp_R", "eyeLookUp_L", "eyeLookUp_R", "eyeLookDown_L", "eyeLookDown_R", "eyeLookIn_L", "eyeLookIn_R", "eyeLookOut_L", "eyeLookOut_R", "eyeBlink_L", "eyeBlink_R", "eyeSquint_L", "eyeSquint_R", "eyeWide_L", "eyeWide_R", "cheekPuff", "cheekSquint_L", "cheekSquint_R", "noseSneer_L", "noseSneer_R", "jawOpen", "jawForward", "jawLeft", "jawRight", "mouthFunnel", "mouthPucker", "mouthLeft", "mouthRight", "mouthRollUpper", "mouthRollLower", "mouthShrugUpper", "mouthShrugLower", "mouthClose", "mouthSmile_L", "mouthSmile_R", "mouthFrown_L", "mouthFrown_R", "mouthDimple_L", "mouthDimple_R", "mouthUpperUp_L", "mouthUpperUp_R", "mouthLowerDown_L", "mouthLowerDown_R", "mouthPress_L", "mouthPress_R", "mouthStretch_L", "mouthStretch_R", "tongueOut"]
+
+
+        for each in shapelist:
+            print(each)
+            obj.shape_key_add(name = each, from_mix=False)
+        
+        return {'FINISHED'}
+
+class FACETRANSFER_OT_add_fc(bpy.types.Operator):
+    bl_idname = "facetransfer.add_fc"
+    bl_label = "Add FC Shapekeys"
+    bl_description = "Create FC Compatible Shapekeys"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+
+        obj = bpy.context.object
+
+        shapelist = [ "FC_browInnerUp", "FC_browDown_L", "FC_browDown_R", "FC_browOuterUp_L", "FC_browOuterUp_R", "FC_eyeLookUp_L", "FC_eyeLookUp_R", "FC_eyeLookDown_L", "FC_eyeLookDown_R", "FC_eyeLookIn_L", "FC_eyeLookIn_R", "FC_eyeLookOut_L", "FC_eyeLookOut_R", "FC_eyeBlink_L", "FC_eyeBlink_R", "FC_eyeSquint_L", "FC_eyeSquint_R", "FC_eyeWide_L", "FC_eyeWide_R", "FC_cheekPuff", "FC_cheekSquint_L", "FC_cheekSquint_R", "FC_noseSneer_L", "FC_noseSneer_R", "FC_jawOpen", "FC_jawForward", "FC_jawLeft", "FC_jawRight", "FC_mouthFunnel", "FC_mouthPucker", "FC_mouthLeft", "FC_mouthRight", "FC_mouthRollUpper", "FC_mouthRollLower", "FC_mouthShrugUpper", "FC_mouthShrugLower", "FC_mouthClose", "FC_mouthSmile_L", "FC_mouthSmile_R", "FC_mouthFrown_L", "FC_mouthFrown_R", "FC_mouthDimple_L", "FC_mouthDimple_R", "FC_mouthUpperUp_L", "FC_mouthUpperUp_R", "FC_mouthLowerDown_L", "FC_mouthLowerDown_R", "FC_mouthPress_L", "FC_mouthPress_R", "FC_mouthStretch_L", "FC_mouthStretch_R", "FC_tongueOut"]
+
+
+        for each in shapelist:
+            print(each)
+            obj.shape_key_add(name = each, from_mix=False)
+        return {'FINISHED'}
+    
+
+class FACETRANSFER_OT_arkit_to_FC(bpy.types.Operator):
+    bl_idname = "facetransfer.arkit_to_fc"
+    bl_label = "Convert Arkit to FC"
+    bl_description = "Convert Arkit to FC Shapekeys"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+
+        obj = bpy.context.object
+        shapelist = [ "browInnerUp", "browDown_L", "browDown_R", "browOuterUp_L", "browOuterUp_R", "eyeLookUp_L", "eyeLookUp_R", "eyeLookDown_L", "eyeLookDown_R", "eyeLookIn_L", "eyeLookIn_R", "eyeLookOut_L", "eyeLookOut_R", "eyeBlink_L", "eyeBlink_R", "eyeSquint_L", "eyeSquint_R", "eyeWide_L", "eyeWide_R", "cheekPuff", "cheekSquint_L", "cheekSquint_R", "noseSneer_L", "noseSneer_R", "jawOpen", "jawForward", "jawLeft", "jawRight", "mouthFunnel", "mouthPucker", "mouthLeft", "mouthRight", "mouthRollUpper", "mouthRollLower", "mouthShrugUpper", "mouthShrugLower", "mouthClose", "mouthSmile_L", "mouthSmile_R", "mouthFrown_L", "mouthFrown_R", "mouthDimple_L", "mouthDimple_R", "mouthUpperUp_L", "mouthUpperUp_R", "mouthLowerDown_L", "mouthLowerDown_R", "mouthPress_L", "mouthPress_R", "mouthStretch_L", "mouthStretch_R", "tongueOut"]
+
+        # Get the selected object
+        selected_object = bpy.context.active_object
+
+        # Iterate through the shape keys in the list
+        for shape_key_name in shapelist:
+            shape_key = selected_object.data.shape_keys.key_blocks.get(shape_key_name)
+            
+            # If the shape key exists, add the "FC_" prefix
+            if shape_key:
+                shape_key.name = "FC_" + shape_key_name
+        return {'FINISHED'}
 
 class DeleteAllShapeKeyDriversOperator(bpy.types.Operator):
     bl_idname = "object.delete_all_shape_key_drivers"
@@ -30,8 +91,8 @@ class DeleteAllShapeKeyDriversOperator(bpy.types.Operator):
 
         return {'FINISHED'}
 
-class COPY_DRIVERS_OT_operator(bpy.types.Operator):
-    bl_idname = "object.copy_drivers"
+class FACETRANSFER_OT_copy_drivers(bpy.types.Operator):
+    bl_idname = "facetransfer.copy_drivers"
     bl_label = "Copy Drivers"
     bl_description = "Copy drivers from one object to another"
     bl_options = {'REGISTER', 'UNDO'}
@@ -122,12 +183,12 @@ class COPY_DRIVERS_OT_operator(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class COPY_DRIVERS_PT_panel(bpy.types.Panel):
-    bl_label = "Copy Drivers"
-    bl_idname = "COPY_DRIVERS_PT_panel"
+class FACETRANSFER_PT_panel(bpy.types.Panel):
+    bl_label = "FACE TRANSFER"
+    bl_idname = "FACE_TRANSFER_PT_panel"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = 'Copy Drivers'
+    bl_category = 'Face Transfer'
 
     def draw(self, context):
         layout = self.layout
@@ -135,16 +196,27 @@ class COPY_DRIVERS_PT_panel(bpy.types.Panel):
         layout.prop(context.scene, "copy_drivers_target", text="Target Mesh")
         layout.prop_search(context.scene, "copy_drivers_target_armature", context.scene, "objects", text="Target Armature")
         layout.separator()
-        layout.operator("object.copy_drivers")
+        layout.operator("facetransfer.copy_drivers")
         layout.operator("object.delete_all_shape_key_drivers")
+        layout.separator()
+        layout.operator("facetransfer.add_arkit")
+        layout.operator("facetransfer.add_fc")
+        layout.operator("facetransfer.arkit_to_fc")
+        
+        
+        
+
 
 
 
 
 def register():
-    bpy.utils.register_class(COPY_DRIVERS_OT_operator)
+    bpy.utils.register_class(FACETRANSFER_OT_add_arkit)
+    bpy.utils.register_class(FACETRANSFER_OT_add_fc)
+    bpy.utils.register_class(FACETRANSFER_OT_arkit_to_FC)
+    bpy.utils.register_class(FACETRANSFER_OT_copy_drivers)
     bpy.utils.register_class(DeleteAllShapeKeyDriversOperator)
-    bpy.utils.register_class(COPY_DRIVERS_PT_panel)
+    bpy.utils.register_class(FACETRANSFER_PT_panel)
     bpy.types.Scene.copy_drivers_source = bpy.props.PointerProperty(type=bpy.types.Object)
     bpy.types.Scene.copy_drivers_target = bpy.props.PointerProperty(type=bpy.types.Object)
     bpy.types.Scene.copy_drivers_target_armature = bpy.props.PointerProperty(
@@ -153,9 +225,12 @@ def register():
     )
 
 def unregister():
-    bpy.utils.unregister_class(COPY_DRIVERS_OT_operator)
+    bpy.utils.unregister_class(FACETRANSFER_OT_add_arkit)
+    bpy.utils.unregister_class(FACETRANSFER_OT_add_fc)
+    bpy.utils.unregister_class(FACETRANSFER_OT_arkit_to_FC)
+    bpy.utils.unregister_class(FACETRANSFER_OT_copy_drivers)
     bpy.utils.unregister_class(DeleteAllShapeKeyDriversOperator)
-    bpy.utils.unregister_class(COPY_DRIVERS_PT_panel)
+    bpy.utils.unregister_class(FACETRANSFER_PT_panel)
     del bpy.types.Scene.copy_drivers_source
     del bpy.types.Scene.copy_drivers_target
     del bpy.types.Scene.copy_drivers_target_armature
