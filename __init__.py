@@ -137,12 +137,22 @@ class FACETRANSFER_OT_copy_drivers(bpy.types.Operator):
                 else:
                     id_data = var.targets[0].id
                     owner = next((obj for obj in context.scene.objects if obj.data == id_data), None)
-                    if owner and owner.type == 'MESH':
-                        new_var.targets[0].id = owner
-                        new_var.targets[0].data_path = 'data.' + var.targets[0].data_path
-                    else:
-                        new_var.targets[0].id = id_data
-                        new_var.targets[0].data_path = var.targets[0].data_path
+                    if var.type == 'SINGLE_PROP' and target_obj:
+                        
+                        if var.type == 'SINGLE_PROP' and target_obj:
+                        
+                            if owner and owner.type == 'MESH':
+                                new_var.targets[0].id_type= 'MESH'
+                                new_var.targets[0].id = target_obj.data
+                                new_var.targets[0].data_path = var.targets[0].data_path
+                            else:
+                                new_var.targets[0].id_type= 'MESH'
+                                new_var.targets[0].id = target_obj.data
+                                new_var.targets[0].data_path = var.targets[0].data_path.lstrip("data.")
+                            
+                        else:
+                            new_var.targets[0].id = id_data
+                            new_var.targets[0].data_path = var.targets[0].data_path
 
                 new_var.targets[0].transform_type = var.targets[0].transform_type
                 new_var.targets[0].transform_space = var.targets[0].transform_space
@@ -183,6 +193,50 @@ class FACETRANSFER_OT_copy_drivers(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class FACETRANSFER_OT_type_obj_to_mesh(bpy.types.Operator):
+    bl_idname = "facetransfer.type_obj_to_mesh"
+    bl_label = "ID Type Obj to Mesh"
+    bl_description = "Convert vars ID types in Drivers, removing prefix .data from datapaths. It helps avoiding dependency cycles"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+
+        # Get the active object
+        obj = bpy.context.active_object
+
+        # Check if the object has shape keys
+        if obj.data.shape_keys:
+
+            # Iterate through shape key drivers
+            for fcurve in obj.data.shape_keys.animation_data.drivers:
+
+                # Iterate through the driver variables
+                for var in fcurve.driver.variables:
+
+                    # Check if the variable's type is single property
+                    if var.type == 'SINGLE_PROP':
+
+                        # Store the current target ID
+                        current_target_id = var.targets[0].id
+
+                        # Update the data path to remove "data."
+                        if var.targets[0].data_path.startswith("data."):
+                            var.targets[0].data_path = var.targets[0].data_path[5:]
+
+                        # Change id_type from "OBJECT" to "MESH" while keeping the same ID block
+                        if var.targets[0].id_type == 'OBJECT':
+                            var.targets[0].id_type = 'MESH'
+                            var.targets[0].id = current_target_id.data
+
+            # Refresh the depsgraph to update the changes
+            bpy.context.evaluated_depsgraph_get().update()
+        else:
+            print("The active object does not have any shape keys.")
+        return {'FINISHED'}
+
+
+
+
 class FACETRANSFER_PT_panel(bpy.types.Panel):
     bl_label = "FACE TRANSFER"
     bl_idname = "FACE_TRANSFER_PT_panel"
@@ -202,6 +256,8 @@ class FACETRANSFER_PT_panel(bpy.types.Panel):
         layout.operator("facetransfer.add_arkit")
         layout.operator("facetransfer.add_fc")
         layout.operator("facetransfer.arkit_to_fc")
+        layout.separator()
+        layout.operator("facetransfer.type_obj_to_mesh")
         
         
         
@@ -211,6 +267,7 @@ class FACETRANSFER_PT_panel(bpy.types.Panel):
 
 
 def register():
+    bpy.utils.register_class(FACETRANSFER_OT_type_obj_to_mesh)
     bpy.utils.register_class(FACETRANSFER_OT_add_arkit)
     bpy.utils.register_class(FACETRANSFER_OT_add_fc)
     bpy.utils.register_class(FACETRANSFER_OT_arkit_to_FC)
@@ -225,6 +282,7 @@ def register():
     )
 
 def unregister():
+    bpy.utils.unregister_class(FACETRANSFER_OT_type_obj_to_mesh)
     bpy.utils.unregister_class(FACETRANSFER_OT_add_arkit)
     bpy.utils.unregister_class(FACETRANSFER_OT_add_fc)
     bpy.utils.unregister_class(FACETRANSFER_OT_arkit_to_FC)
